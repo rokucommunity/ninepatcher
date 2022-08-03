@@ -1,13 +1,10 @@
 import * as Jimp from 'jimp';
+import { Color } from './Color';
 
-export function normalizeColor(color: number | string | number[]) {
-
-}
-
-export function plotAntiAliasedPoint(image: Jimp, color: number, x: number, y: number) {
-    const baselineColor = colorToRgbaArray(color) ?? [0, 0, 0, 255];
+export function plotAntiAliasedPoint(image: Jimp, color: Color, x: number, y: number) {
+    const baselineColor = new Color(color ?? [0, 0, 0, 255]);
     //mark alpha as fully transparent (we will darken it in this algorithm)
-    baselineColor[3] = 0;
+    baselineColor.setPart('alpha', 0);
     const vertexColors = {} as Record<string, number[]>;
     for (let rounded_x = Math.floor(x); rounded_x < Math.ceil(x); rounded_x++) {
         for (let rounded_y = Math.floor(y); rounded_y < Math.ceil(y); rounded_y++) {

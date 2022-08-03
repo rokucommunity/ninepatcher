@@ -1,19 +1,49 @@
 /**
- * Represents a single color value, containing r,g,b,a.
+ * Represents a single rgba color
  */
 export class Color {
 
-    public constructor(value: number | string | number[]) {
+    public constructor(value: ColorLike) {
         this.set(value);
     }
 
-    private value: RgbaArray;
+    private value!: RgbaArray;
 
     /**
      * Set the value (from any format)
      */
-    public set(value: number | string | number[]) {
+    public set(value: ColorLike) {
         this.value = toRgbaArray(value);
+    }
+
+    /**
+     * Get a specific part of the color
+     */
+    public getPart(part: ColorPart) {
+        if (part === 'red') {
+            return this.value[0];
+        } else if (part === 'blue') {
+            return this.value[1];
+        } else if (part === 'green') {
+            return this.value[2];
+        } else if (part === 'alpha') {
+            return this.value[3];
+        }
+    }
+
+    /**
+     * Set a specific part of the color
+     */
+    public setPart(part: ColorPart, value: number) {
+        if (part === 'red') {
+            return this.value[0] = value;
+        } else if (part === 'blue') {
+            return this.value[1] = value;
+        } else if (part === 'green') {
+            return this.value[2] = value;
+        } else if (part === 'alpha') {
+            return this.value[3] = value;
+        }
     }
 
     /**
@@ -30,37 +60,47 @@ export class Color {
     public toHex() {
         return `#${this.value.map(x => x.toString(16))}`;
     }
+
+    /**
+     * Get this color as an array of rgba values
+     */
+    public toRgbaArray() {
+        return [...this.value] as RgbaArray;
+    }
 }
 
 /**
  * Backfills any missing colors with black, and missing opacity with fully opaque
  */
-function backfill(value: number[]) {
-    if (Array.isArray(value)) {
-        while (value.length < 4) {
-            //pad with black
-            if (value.length < 3) {
-                value.push(0);
-            }
-            //default to fully opaque
-            if (value.length === 3) {
-                value.push(255);
+function backfill(rgbaLike: number[]) {
+    const result: RgbaArray = [0, 0, 0, 255];
+    if (Array.isArray(rgbaLike)) {
+        for (let i = 0; i < 4; i++) {
+            const colorPart = rgbaLike[i];
+            if (colorPart !== undefined && colorPart !== null || !isNaN(colorPart)) {
+                result.push(colorPart);
             }
         }
-        return value as RgbaArray;
+        return result;
     }
 }
 
-type RgbaArray = [number, number, number, number];
+function isColor(value: any): value is Color {
+    return value?.constructor?.name === 'Color';
+}
 
 /**
  * Take any color value and turn it into an rgba array
  */
-function toRgbaArray(value: string | number | number[]) {
+function toRgbaArray(value: ColorLike) {
     let result: number[] | undefined;
     //An RGBA color array
     if (Array.isArray(value)) {
         result = value as any;
+
+        //Color class
+    } else if (isColor(value)) {
+        result = value.toRgbaArray();
 
         // integer color
     } else if (typeof value === 'number') {
@@ -97,7 +137,7 @@ function toRgbaArray(value: string | number | number[]) {
  * Given a string, extract hex letter pairs
  */
 function extractHex(value: string) {
-    const parts = /(\w\w)+/.exec(value);
+    const parts = /(\w\w)(\w\w)?(\w\w)?(\w\w)?/.exec(value);
     if (parts) {
         //remove the full match so we can keep just the gropus
         parts.shift();
@@ -105,3 +145,9 @@ function extractHex(value: string) {
     }
     return parts ?? undefined;
 }
+
+export type ColorLike = number | string | number[] | RgbaArray | Color;
+
+export type ColorPart = 'red' | 'blue' | 'green' | 'alpha';
+
+export type RgbaArray = [red: number, green: number, blue: number, alpha: number];

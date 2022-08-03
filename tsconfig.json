@@ -1,6 +1,25 @@
 {
-    "files": [
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "target": "ES2017",
+        "module": "CommonJS",
+        "sourceMap": true,
+        "rootDir": "src",
+        "outDir": "dist",
+        "declaration": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "forceConsistentCasingInFileNames": true,
+        "experimentalDecorators": true,
+        "preserveConstEnums": true,
+        "downlevelIteration": true,
+        "noUnusedLocals": true
+    },
+    "include": [
         "src/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules/**/*"
     ],
     "ts-node": {
         "transpileOnly": true

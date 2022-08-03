@@ -1,5 +1,7 @@
 import * as Jimp from 'jimp';
 import * as path from 'path';
+import type { ColorLike } from './Color';
+import { Color } from './Color';
 import * as util from './util';
 
 /**
@@ -13,14 +15,14 @@ export function generate(configs: ImageConfig | ImageConfig[]) {
 }
 
 function generateSingle(config: ImageConfig) {
-    const backgroundColor = util.normalizeColor(config.backgroundColor ?? '#00000000');
-    const fillColor = util.normalizeColor(config.fillColor ?? backgroundColor);
-    const borderColor = util.normalizeColor(config.borderColor ?? fillColor);
+    const backgroundColor = new Color(config.backgroundColor ?? '#00000000');
+    const fillColor = new Color(config.fillColor ?? backgroundColor);
+    const borderColor = new Color(config.borderColor ?? fillColor);
     const borderRadius = config.borderRadius ?? 5;
     const width = borderRadius * 2;
     const height = borderRadius * 2;
 
-    let image = new Jimp(width + 2, height + 2, backgroundColor, (err, image) => {
+    let image = new Jimp(width + 2, height + 2, backgroundColor.toInteger(), (err, image) => {
         if (err) throw err
     })
 
@@ -35,21 +37,18 @@ function generateSingle(config: ImageConfig) {
     return image.write(outFilePath);
 }
 
-class Canvas{
+class Canvas {
     private pixels: Record<string, Rgba> = {};
 
     public replacePixel(color:
 }
 
 
-function drawCircle(image: Jimp, options: { radius: number, borderColor: number, translationX: number, translationY: number }) {
+function drawCircle(image: Jimp, options: { radius: number, borderColor: Color, translationX: number, translationY: number }) {
     const points = {} as Record<string, Rgba>;
     const theta_scale = 0.001;        //Set lower to add more points
     const sizeValue = (2.0 * Math.PI) / theta_scale;
     let size = Math.floor(sizeValue) + 1;
-    // lineRenderer.startWidth = 0.1f;
-    // lineRenderer.endWidth = 0.1f;
-    // lineRenderer.positionCount = size;
     let theta = 0;
     for (let i = 0; i < size; i++) {
         theta += (2.0 * Math.PI * theta_scale);
@@ -67,15 +66,16 @@ const scalars = {
     "hd": .666
 };
 
+
 interface ImageConfig {
     /**
      * The color of the background
      */
-    backgroundColor?: number | string;
+    backgroundColor?: ColorLike;
     /**
      * The color of the border.
      */
-    borderColor?: number | string;
+    borderColor?: ColorLike;
     /**
      * The curve of the border. 0 means square
      */
@@ -87,7 +87,7 @@ interface ImageConfig {
     /**
      * The color INSIDE the radius
      */
-    fillColor?: number | string;
+    fillColor?: ColorLike;
     /**
      * The root dir where this image should be written
      */

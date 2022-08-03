@@ -2,17 +2,79 @@
   "name": "9patch-generator",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "ts-node src/index.ts"
+    "test": "nyc mocha",
+    "test:nocover": "mocha",
+    "test:watch": "mocha --watch"
+  },
+  "mocha": {
+    "spec": "src/**/*.spec.ts",
+    "require": [
+      "source-map-support/register",
+      "ts-node/register"
+    ],
+    "fullTrace": true,
+    "timeout": 987654321,
+    "watchExtensions": [
+      "ts"
+    ]
+  },
+  "files": [
+    "dist/**/!(*.spec.*)*",
+    "bslib.brs",
+    "bsconfig.schema.json"
+  ],
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "bin": {
+    "bsc": "dist/cli.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "jimp": "^0.16.1"
   },
   "devDependencies": {
+    "@types/chai": "^4.3.1",
+    "@types/mocha": "^9.1.1",
+    "@types/sinon": "^10.0.13",
+    "@types/yargs": "^17.0.10",
+    "@typescript-eslint/eslint-plugin": "^5.32.0",
+    "@typescript-eslint/parser": "^5.32.0",
+    "chai": "^4.3.6",
+    "coveralls": "^3.1.1",
+    "eslint": "^8.21.0",
+    "eslint-plugin-no-only-tests": "^3.0.0",
+    "mocha": "^10.0.0",
+    "nyc": "^15.1.0",
+    "rimraf": "^3.0.2",
+    "sinon": "^14.0.0",
+    "source-map-support": "^0.5.13",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts",
+      "!src/**/*.spec.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register",
+      "source-map-support/register"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ],
+    "sourceMap": true,
+    "instrument": true,
+    "check-coverage": false,
+    "lines": 100,
+    "statements": 100,
+    "functions": 100,
+    "branches": 100
   }
 }
