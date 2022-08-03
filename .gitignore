@@ -1,0 +1,17 @@
+node_modules*
+dist
+out
+.tmp
+.history
+.DS_Store
+.roku-deploy-staging
+coverage
+.nyc_output
+*.zip
+graph.svg
+.history
+*.tgz
+benchmarks/*.json
+benchmarks/*.brs
+isolate-*
+v8*.log

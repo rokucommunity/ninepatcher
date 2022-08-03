@@ -1,0 +1,8 @@
+{
+    "files": [
+        "src/**/*.ts"
+    ],
+    "ts-node": {
+        "transpileOnly": true
+    }
+}
