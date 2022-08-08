@@ -37,15 +37,7 @@ function generateSingle(config: ImageConfig) {
     return image.write(outFilePath);
 }
 
-class Canvas {
-    private pixels: Record<string, Rgba> = {};
-
-    public replacePixel(color:
-}
-
-
 function drawCircle(image: Jimp, options: { radius: number, borderColor: Color, translationX: number, translationY: number }) {
-    const points = {} as Record<string, Rgba>;
     const theta_scale = 0.001;        //Set lower to add more points
     const sizeValue = (2.0 * Math.PI) / theta_scale;
     let size = Math.floor(sizeValue) + 1;
@@ -103,8 +95,6 @@ interface ImageConfig {
      */
     outFile: string;
 }
-
-export type Rgba = number[];
 
 generate({
     backgroundColor: 'rgba(0, 0, 0, 0)',

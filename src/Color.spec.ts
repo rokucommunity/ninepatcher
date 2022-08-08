@@ -11,6 +11,17 @@ describe('Color', () => {
         expectColor('#01020304', [1, 2, 3, 4]);
     });
 
+    it('snaps to upper and lower bounds', () => {
+        expectColor(
+            new Color([500, 500, 500, 500]),
+            [255, 255, 255, 255]
+        );
+        expectColor(
+            new Color([-500, -500, -500, -500]),
+            [0, 0, 0, 0]
+        );
+    });
+
     it('backfills missing hex values', () => {
         expectColor('#01', [1, 0, 0, 255]);
         expectColor('#0102', [1, 2, 0, 255]);
@@ -42,5 +53,39 @@ describe('Color', () => {
         expectColor(0x00010203, [0, 1, 2, 3]);
         expectColor(0x00000102, [0, 0, 1, 2]);
         expectColor(0x01020300, [1, 2, 3, 0]);
+    });
+
+    describe('merge', () => {
+        it('merges all colors', () => {
+            expectColor(
+                new Color([1, 2, 3, 4]).merge([10, 20, 30, 40]),
+                [11, 22, 33, 44]
+            );
+        });
+        it('ignores zeros from incoming color', () => {
+            expectColor(
+                new Color([1, 2, 3, 4]).merge([0, 20, 30, 40]),
+                [1, 22, 33, 44]
+            );
+            expectColor(
+                new Color([1, 2, 3, 4]).merge([10, 0, 30, 40]),
+                [11, 2, 33, 44]
+            );
+            expectColor(
+                new Color([1, 2, 3, 4]).merge([10, 20, 0, 40]),
+                [11, 22, 3, 44]
+            );
+            expectColor(
+                new Color([1, 2, 3, 4]).merge([10, 20, 30, 0]),
+                [11, 22, 33, 4]
+            );
+        });
+
+        it('snaps to upper and lower bounds', () => {
+            expectColor(
+                new Color([500, 500, 500, 500]).merge([500, 500, 500, 500]),
+                [255, 255, 255, 255]
+            );
+        });
     });
 });

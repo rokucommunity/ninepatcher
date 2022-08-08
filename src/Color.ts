@@ -47,6 +47,18 @@ export class Color {
     }
 
     /**
+     * Merge the incoming color and this color together. Colors are added together, and are capped at the max value of 255 for each color
+     */
+    public merge(color: ColorLike) {
+        const incoming = toRgbaArray(color);
+        for (let i = 0; i < this.value.length; i++) {
+            this.value[i] = incoming[i] + this.value[i];
+        }
+        snapToBoundaries(this.value);
+        return this;
+    }
+
+    /**
      * Get this color as an integer
      */
     public toInteger() {
@@ -67,6 +79,10 @@ export class Color {
     public toRgbaArray() {
         return [...this.value] as RgbaArray;
     }
+
+    public clone() {
+        return new Color(this);
+    }
 }
 
 /**
@@ -83,6 +99,17 @@ function backfill(rgbaLike: number[]) {
         }
         return result;
     }
+}
+
+function snapToBoundaries(rgba: RgbaArray) {
+    for (let i = 0; i < 4; i++) {
+        if (rgba[i] < 0) {
+            rgba[i] = 0;
+        } else if (rgba[i] > 255) {
+            rgba[i] = 255;
+        }
+    }
+    return rgba;
 }
 
 function isColor(value: any): value is Color {
@@ -132,7 +159,10 @@ function toRgbaArray(value: ColorLike) {
 
     if (result) {
         result = backfill(result);
+        //snap out-of-bounds values to min/max boundaryes
+        result = snapToBoundaries(result as RgbaArray);
     }
+
     if (result?.length !== 4) {
         throw new Error(`Unsupported color format: '${value}'`);
     } else {
