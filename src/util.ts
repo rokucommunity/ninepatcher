@@ -5,6 +5,7 @@ export function drawCircle(canvas: Canvas, options: { radius: number; borderColo
     drawCircumference(canvas, {
         radius: options.radius,
         color: options.borderColor,
+        strokeWidth: options.borderWidth,
         antiAlias: false
     });
 
@@ -18,13 +19,15 @@ export function drawCircle(canvas: Canvas, options: { radius: number; borderColo
     // }
 }
 
-export function drawCircumference(canvas: Canvas, options: { radius: number, color: Color, antiAlias: boolean }) {
-    const radius = options.radius;
-    const theta_scale = 0.0001;        //Set lower to add more points
+export function drawCircumference(canvas: Canvas, options: { radius: number, color: Color, antiAlias: boolean, strokeWidth: number }) {
+    const strokeWidth = options.strokeWidth ?? 1;
+    //the actual radius should represent the center of the line
+    const radius = options.radius - (strokeWidth / 2);
+    const theta_scale = 0.001;        //Set lower to add more points
     const sizeValue = (2.0 * Math.PI) / theta_scale;
-    let size = Math.floor(sizeValue) + 1;
+    let stepCount = Math.floor(sizeValue) + 1;
     let theta = 0;
-    for (let i = 0; i < size; i++) {
+    for (let i = 0; i < stepCount; i++) {
         theta += (2.0 * Math.PI * theta_scale);
         let x = radius * Math.cos(theta);
         let y = radius * Math.sin(theta);

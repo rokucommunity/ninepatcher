@@ -20,8 +20,8 @@ function generateSingle(config: ImageConfig) {
     const borderColor = new Color(config.borderColor ?? fillColor);
     const borderWidth = config.borderWidth ?? 1;
     const borderRadius = config.borderRadius ?? 5;
-    const width = borderRadius * 2;
-    const height = borderRadius * 2;
+    const width = (borderRadius * 2) + 2;
+    const height = (borderRadius * 2) + 2;
 
     const canvas = new Canvas(backgroundColor);
     drawCircle(canvas, {
@@ -33,11 +33,20 @@ function generateSingle(config: ImageConfig) {
     canvas.translate(1, 1);
     const black = new Color([0, 0, 0, 255]);
 
+    let centerPoint = (
+        //halfway through the circle
+        borderRadius +
+        //offset by 1 for the repeater bar
+        1
+    );
+    centerPoint = Math.floor(centerPoint);
+
     //draw the black stretch pixels
-    canvas.set(black, 0, borderRadius + 1);
-    canvas.set(black, borderRadius + 1, 0);
+    canvas.set(black, 0, centerPoint);
+    canvas.set(black, centerPoint, 0);
 
     const outPath = path.resolve(config.rootDir ?? process.cwd(), config.outFile)
+    // console.log(canvas.toString());
     canvas.write(outPath, width, height);
 }
 
