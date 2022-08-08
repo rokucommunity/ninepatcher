@@ -3,7 +3,7 @@
 A tool to generate 9-patch images. This was created to support Roku development, but can be used for any 9-patch generation your project might need.
 
 [![build status](https://img.shields.io/github/workflow/status/rokucommunity/9-patch-generator/build.svg?logo=github)](https://github.com/rokucommunity/9-patch-generator/actions?query=workflow%3Abuild)
-[![coverage status](https://img.shields.io/coveralls/github/rokucommunity/9-patch-generator?logo=coveralls)](https://coveralls.io/github/rokucommunity/9-patch-generator?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/rokucommunity/9-patch-generator/badge.svg?branch=master)](https://coveralls.io/github/rokucommunity/9-patch-generator?branch=master)
 [![monthly downloads](https://img.shields.io/npm/dm/9-patch-generator.svg?sanitize=true&logo=npm&logoColor=)](https://npmcharts.com/compare/9-patch-generator?minimal=true)
 [![npm version](https://img.shields.io/npm/v/9-patch-generator.svg?logo=npm)](https://www.npmjs.com/package/9-patch-generator)
 [![license](https://img.shields.io/npm/l/9-patch-generator.svg)](LICENSE)
