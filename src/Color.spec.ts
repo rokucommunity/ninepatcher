@@ -56,6 +56,18 @@ describe('Color', () => {
         expectColor(0x01020300, [1, 2, 3, 0]);
     });
 
+    describe('toInteger', () => {
+        it('converts rgba to proper hex integer', () => {
+            expect(new Color([1, 2, 3, 4]).toInteger()).to.eql(0x01020304);
+        });
+    });
+
+    describe('toHex', () => {
+        it('converts rgba to proper hex string', () => {
+            expect(new Color([1, 2, 3, 4]).toHex()).to.eql('#01020304');
+        });
+    });
+
     describe('merge', () => {
         it('merges all colors', () => {
             expectColor(

@@ -103,7 +103,7 @@ export class Color {
      * Get this color as an integer
      */
     public toInteger() {
-        const hexData = this.value.map(x => x.toString(16));
+        const hexData = this.value.map(x => x.toString(16).padStart(2, '0'));
         return parseInt(`0x${hexData.join('')}`, 16);
     }
 
@@ -111,7 +111,7 @@ export class Color {
      * Get this color as a hex string
      */
     public toHex() {
-        return `#${this.value.map(x => x.toString(16))}`;
+        return `#${this.value.map(x => x.toString(16).padStart(2, '0')).join('')}`;
     }
 
     /**
@@ -123,6 +123,10 @@ export class Color {
 
     public clone() {
         return new Color(this);
+    }
+
+    public toString() {
+        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha}`;
     }
 }
 

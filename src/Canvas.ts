@@ -12,7 +12,7 @@ export class Canvas {
     private grid: Array<Array<Color | undefined>> = [];
 
     private ensurePosition(x: number, y: number) {
-        for (let i = this.grid.length; i <= y; i++) {
+        while (this.grid.length <= y) {
             this.grid.push([]);
         }
         const row = this.grid[y];

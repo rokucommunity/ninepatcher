@@ -28,23 +28,32 @@ export function drawCircle(canvas: Canvas, options: { radius: number; borderColo
         radius: options.radius,
         color: options.borderColor,
         strokeWidth: options.borderWidth,
-        antiAlias: false
+        antiAlias: false,
+        xOffset: options.radius,
+        yOffset: options.radius
     });
 
-    // //fill the circle
-    // for (let radius = options.radius; radius >= 0; radius--) {
-    //     drawCircumference(canvas, {
-    //         radius: radius,
-    //         color: options.fillColor,
-    //         antiAlias: false
-    //     });
-    // }
+    //fill the circle
+    for (let radius = options.radius; radius >= 0; radius--) {
+        drawCircumference(canvas, {
+            strokeWidth: 1,
+            radius: radius,
+            color: options.fillColor,
+            antiAlias: false,
+            //draw these relative to the center of the outer circle
+            xOffset: options.radius,
+            //draw these relative to the center of the outer circle
+            yOffset: options.radius
+        });
+    }
 }
 
-export function drawCircumference(canvas: Canvas, options: { radius: number; color: Color; antiAlias: boolean; strokeWidth: number }) {
+export function drawCircumference(canvas: Canvas, options: { radius: number; color: Color; antiAlias: boolean; strokeWidth: number; xOffset: number; yOffset: number }) {
     const strokeWidth = options.strokeWidth ?? 1;
+    const xOffset = options.xOffset ?? options.radius;
+    const yOffset = options.yOffset ?? options.radius;
     //the actual radius should represent the center of the line
-    const radius = options.radius - (strokeWidth / 2);
+    const radius = Math.abs(options.radius - (strokeWidth / 2));
     const thetaScale = 0.001; //Set lower to add more points
     const sizeValue = (2.0 * Math.PI) / thetaScale;
     let stepCount = Math.floor(sizeValue) + 1;
@@ -53,9 +62,8 @@ export function drawCircumference(canvas: Canvas, options: { radius: number; col
         theta += (2.0 * Math.PI * thetaScale);
         let x = radius * Math.cos(theta);
         let y = radius * Math.sin(theta);
-        //draw where 0,0 is the leftmost and topmost coordinate
-        x += radius;
-        y += radius;
+        x += xOffset;
+        y += yOffset;
 
         if (options.antiAlias) {
             canvas.setAntiAliased(options.color, x, y);
