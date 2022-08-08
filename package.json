@@ -41,7 +41,7 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "bin": {
-    "bsc": "dist/cli.js"
+    "ninepatcher": "dist/cli.js"
   },
   "repository": {
     "type": "git",
