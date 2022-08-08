@@ -77,8 +77,8 @@ function backfill(rgbaLike: number[]) {
     if (Array.isArray(rgbaLike)) {
         for (let i = 0; i < 4; i++) {
             const colorPart = rgbaLike[i];
-            if (colorPart !== undefined && colorPart !== null || !isNaN(colorPart)) {
-                result.push(colorPart);
+            if (colorPart !== undefined && colorPart !== null && !isNaN(colorPart)) {
+                result[i] = colorPart;
             }
         }
         return result;
@@ -104,7 +104,14 @@ function toRgbaArray(value: ColorLike) {
 
         // integer color
     } else if (typeof value === 'number') {
-        result = extractHex(value.toString(16));
+        let hex = value.toString(16);
+        //javascript omits the leading character if it's a zero, so add that back
+        if (hex.length % 2 === 1) {
+            hex = '0' + hex;
+        }
+        //we have to treat integer values as rgba integers, so prepend '0' to max out the value.
+        hex = hex.padStart(8, '0');
+        result = extractHex(hex);
 
         //hex color
     } else if (value.startsWith('#')) {
@@ -116,7 +123,7 @@ function toRgbaArray(value: ColorLike) {
 
         //rgb or rgba value
     } else if (value.startsWith('rgb')) {
-        result = /rgb(?:a?)\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*(\d{1,3}))?\)/
+        result = /\s*rgb(?:a?)\s*\(\s*(\d{1,3})\s*(?:,\s*(\d{1,3})\s*)?(?:,\s*(\d{1,3}))?(?:\s*,\s*(\d{1,3}))?\s*\)\s*/
             .exec(value)
             //remove the full match
             ?.slice(1)
@@ -127,7 +134,7 @@ function toRgbaArray(value: ColorLike) {
         result = backfill(result);
     }
     if (result?.length !== 4) {
-        throw new Error(`Unsupported color format: ${value}`);
+        throw new Error(`Unsupported color format: '${value}'`);
     } else {
         return result as RgbaArray;
     }
