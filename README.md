@@ -1,12 +1,12 @@
-# 9-patch-generator
+# ninepatcher
 
 A tool to generate 9-patch images. This was created to support Roku development, but can be used for any 9-patch generation your project might need.
 
-[![build status](https://img.shields.io/github/workflow/status/rokucommunity/9-patch-generator/build.svg?logo=github)](https://github.com/rokucommunity/9-patch-generator/actions?query=workflow%3Abuild)
-[![Coverage Status](https://coveralls.io/repos/github/rokucommunity/9-patch-generator/badge.svg?branch=master)](https://coveralls.io/github/rokucommunity/9-patch-generator?branch=master)
-[![monthly downloads](https://img.shields.io/npm/dm/9-patch-generator.svg?sanitize=true&logo=npm&logoColor=)](https://npmcharts.com/compare/9-patch-generator?minimal=true)
-[![npm version](https://img.shields.io/npm/v/9-patch-generator.svg?logo=npm)](https://www.npmjs.com/package/9-patch-generator)
-[![license](https://img.shields.io/npm/l/9-patch-generator.svg)](LICENSE)
+[![build status](https://img.shields.io/github/workflow/status/rokucommunity/ninepatcher/build.svg?logo=github)](https://github.com/rokucommunity/ninepatcher/actions?query=workflow%3Abuild)
+[![Coverage Status](https://coveralls.io/repos/github/rokucommunity/ninepatcher/badge.svg?branch=master)](https://coveralls.io/github/rokucommunity/ninepatcher?branch=master)
+[![monthly downloads](https://img.shields.io/npm/dm/ninepatcher.svg?sanitize=true&logo=npm&logoColor=)](https://npmcharts.com/compare/ninepatcher?minimal=true)
+[![npm version](https://img.shields.io/npm/v/ninepatcher.svg?logo=npm)](https://www.npmjs.com/package/ninepatcher)
+[![license](https://img.shields.io/npm/l/ninepatcher.svg)](LICENSE)
 [![Slack](https://img.shields.io/badge/Slack-RokuCommunity-4A154B?logo=slack)](https://join.slack.com/t/rokudevelopers/shared_invite/zt-4vw7rg6v-NH46oY7hTktpRIBM_zGvwA)
 
 ## Overview
@@ -18,7 +18,7 @@ More details coming soon!
 ### npm
 
 ```bash
-npm install -g 9-patch-generator
+npm install -g ninepatcher
 ```
 
 ## Usage

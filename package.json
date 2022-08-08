@@ -1,7 +1,7 @@
 {
-  "name": "9patch-generator",
+  "name": "ninepatcher",
   "version": "0.1.0",
-  "description": "A 9patch generator written in pure Node.js that does not depend on chromium.",
+  "description": "A 9-patch generator written in pure Node.js that does not depend on chromium.",
   "scripts": {
     "preversion": "npm run build && npm run lint && npm run test",
     "build": "rimraf out && tsc",
@@ -13,6 +13,14 @@
     "test:watch": "mocha --watch",
     "publish-coverage": "nyc report --reporter=text-lcov | coveralls"
   },
+  "keywords": [
+    "9-patch",
+    "9 patch",
+    "9patch",
+    "nine-patch",
+    "nine patch",
+    "ninepatch"
+  ],
   "mocha": {
     "spec": "src/**/*.spec.ts",
     "require": [
@@ -42,7 +50,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "jimp": "^0.16.1"
+    "jimp": "^0.16.1",
+    "yargs": "^17.5.1"
   },
   "devDependencies": {
     "@types/chai": "^4.1.2",
