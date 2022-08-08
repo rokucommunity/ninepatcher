@@ -1,5 +1,26 @@
 import { Canvas } from "./Canvas";
 import { Color } from "./Color";
+import { parse as parseJsonc, ParseError, printParseErrorCode } from 'jsonc-parser';
+import * as fsExtra from 'fs-extra';
+
+export function readJsoncSync<T>(path: string) {
+    const contents = fsExtra.readFileSync(path).toString();
+    let parseErrors = [] as ParseError[];
+    let projectConfig = parseJsonc(contents, parseErrors, {
+        allowEmptyContent: true,
+        allowTrailingComma: true,
+        disallowComments: false
+    }) as T ?? {};
+
+    if (parseErrors.length > 0) {
+        for (const error of parseErrors) {
+            console.error(`${printParseErrorCode(error.error)} at offset ${error.offset}`);
+        }
+        throw new Error(`Config file contains syntax errors: ${path}`);
+    }
+
+    return projectConfig;
+}
 
 export function drawCircle(canvas: Canvas, options: { radius: number; borderColor: Color; borderWidth: number; fillColor: Color }) {
     drawCircumference(canvas, {

@@ -1,0 +1,13 @@
+{
+    "outDir": ".tmp",
+    "images": [
+        {
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "#FF0000",
+            "fillColor": "#00FF00",
+            "borderRadius": 19,
+            "stretchWidth": 1,
+            "outFile": "output.png"
+        }
+    ]
+}
