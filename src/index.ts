@@ -1,1 +1,1 @@
-export { NinePatcher } from "./NinePatcher";
+export { NinePatcher } from './NinePatcher';

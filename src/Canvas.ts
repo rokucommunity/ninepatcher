@@ -1,4 +1,4 @@
-import { Color } from "./Color";
+import type { Color } from './Color';
 import * as Jimp from 'jimp';
 
 export class Canvas {
@@ -19,7 +19,6 @@ export class Canvas {
         for (let i = row.length; i <= x; i++) {
             row.push(undefined);
         }
-        return
     }
 
     /**
@@ -85,11 +84,11 @@ export class Canvas {
 
         for (let roundedX = Math.floor(x); roundedX < Math.ceil(x); roundedX++) {
             for (let roundedY = Math.floor(y); roundedY < Math.ceil(y); roundedY++) {
-                let percentX = 1 - Math.abs(x - roundedX)
-                let percentY = 1 - Math.abs(y - roundedY)
-                let percent = percentX * percentY
+                let percentX = 1 - Math.abs(x - roundedX);
+                let percentY = 1 - Math.abs(y - roundedY);
+                let percent = percentX * percentY;
 
-                const currentAlpha = (this.get(x, y) ?? color.clone()).alpha
+                const currentAlpha = (this.get(x, y) ?? color.clone()).alpha;
                 const additionalAlpha = 255 * percent;
                 //make the pixel more solid by this percentage
                 const antiAliasedColor = color.clone().setAlpha(
@@ -132,8 +131,10 @@ export class Canvas {
 
     public write(outPath: string, width: number, height: number) {
         let image = new Jimp(width + 2, height + 2, this.backgroundColor.toInteger(), (err, image) => {
-            if (err) throw err
-        })
+            if (err) {
+                throw err;
+            }
+        });
         for (let y = 0; y < this.grid.length; y++) {
             const row = this.grid[y];
             for (let x = 0; x < row.length; x++) {

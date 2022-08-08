@@ -40,9 +40,9 @@ export class NinePatcher {
         const canvas = new Canvas(backgroundColor);
         drawCircle(canvas, {
             radius: borderRadius,
-            borderColor,
-            borderWidth,
-            fillColor,
+            borderColor: borderColor,
+            borderWidth: borderWidth,
+            fillColor: fillColor
         });
         canvas.translate(1, 1);
         const black = new Color([0, 0, 0, 255]);
@@ -59,7 +59,7 @@ export class NinePatcher {
         canvas.set(black, 0, centerPoint);
         canvas.set(black, centerPoint, 0);
 
-        const outPath = path.resolve(this.outDir, config.outFile)
+        const outPath = path.resolve(this.outDir, config.outFile);
         // console.log(canvas.toString());
         canvas.write(outPath, width, height);
     }

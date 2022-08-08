@@ -1,6 +1,7 @@
-import { Canvas } from "./Canvas";
-import { Color } from "./Color";
-import { parse as parseJsonc, ParseError, printParseErrorCode } from 'jsonc-parser';
+import type { Canvas } from './Canvas';
+import type { Color } from './Color';
+import type { ParseError } from 'jsonc-parser';
+import { parse as parseJsonc, printParseErrorCode } from 'jsonc-parser';
 import * as fsExtra from 'fs-extra';
 
 export function readJsoncSync<T>(path: string) {
@@ -40,16 +41,16 @@ export function drawCircle(canvas: Canvas, options: { radius: number; borderColo
     // }
 }
 
-export function drawCircumference(canvas: Canvas, options: { radius: number, color: Color, antiAlias: boolean, strokeWidth: number }) {
+export function drawCircumference(canvas: Canvas, options: { radius: number; color: Color; antiAlias: boolean; strokeWidth: number }) {
     const strokeWidth = options.strokeWidth ?? 1;
     //the actual radius should represent the center of the line
     const radius = options.radius - (strokeWidth / 2);
-    const theta_scale = 0.001;        //Set lower to add more points
-    const sizeValue = (2.0 * Math.PI) / theta_scale;
+    const thetaScale = 0.001; //Set lower to add more points
+    const sizeValue = (2.0 * Math.PI) / thetaScale;
     let stepCount = Math.floor(sizeValue) + 1;
     let theta = 0;
     for (let i = 0; i < stepCount; i++) {
-        theta += (2.0 * Math.PI * theta_scale);
+        theta += (2.0 * Math.PI * thetaScale);
         let x = radius * Math.cos(theta);
         let y = radius * Math.sin(theta);
         //draw where 0,0 is the leftmost and topmost coordinate

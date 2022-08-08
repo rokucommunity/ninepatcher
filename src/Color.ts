@@ -30,7 +30,7 @@ export class Color {
     /**
      * The green value
      */
-     public get green() {
+    public get green() {
         return this.value[1];
     }
     public set green(value) {
@@ -216,7 +216,7 @@ function extractHex(value: string) {
     if (parts) {
         //remove the full match so we can keep just the gropus
         parts.shift();
-        return parts.map(x => parseInt(x, 16))
+        return parts.map(x => parseInt(x, 16));
     }
     return parts ?? undefined;
 }

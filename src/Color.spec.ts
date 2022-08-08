@@ -1,5 +1,6 @@
-import { expect } from "chai";
-import { Color, ColorLike, RgbaArray } from "./Color";
+import { expect } from 'chai';
+import type { ColorLike, RgbaArray } from './Color';
+import { Color } from './Color';
 
 describe('Color', () => {
     function expectColor(input: ColorLike, expected: RgbaArray) {
