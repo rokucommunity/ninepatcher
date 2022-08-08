@@ -1,33 +1,41 @@
-import * as Jimp from 'jimp';
-import { Color } from './Color';
+import { Canvas } from "./Canvas";
+import { Color } from "./Color";
 
-export function plotAntiAliasedPoint(image: Jimp, color: Color, x: number, y: number) {
-    const baselineColor = new Color(color ?? [0, 0, 0, 255]);
-    //mark alpha as fully transparent (we will darken it in this algorithm)
-    baselineColor.setPart('alpha', 0);
-    const vertexColors = {} as Record<string, Color>;
-    for (let rounded_x = Math.floor(x); rounded_x <= Math.ceil(x); rounded_x++) {
-        for (let rounded_y = Math.floor(y); rounded_y <= Math.ceil(y); rounded_y++) {
-            let percent_x = 1 - Math.abs(x - rounded_x)
-            let percent_y = 1 - Math.abs(y - rounded_y)
-            let percent = percent_x * percent_y
-            const key = `${rounded_x},${rounded_y}`;
-            if (!vertexColors[key]) {
-                vertexColors[key] = baselineColor.clone();
-            }
-            const vertexColor = vertexColors[key];
-            //make the pixel more solid by this percentage
-            vertexColor.merge(new Color([0, 0, 0, 255 * percent]));
-        }
-    }
-    //write the unique colors to the image
-    for (const key in vertexColors) {
-        const [x, y] = key.split(',').map(x => parseInt(x));
-        const vertexColor = vertexColors[key];
-        image.setPixelColor(vertexColor.toInteger(), x, y);
-    }
+export function drawCircle(canvas: Canvas, options: { radius: number; borderColor: Color; borderWidth: number; fillColor: Color }) {
+    drawCircumference(canvas, {
+        radius: options.radius,
+        color: options.borderColor,
+        antiAlias: false
+    });
+
+    // //fill the circle
+    // for (let radius = options.radius; radius >= 0; radius--) {
+    //     drawCircumference(canvas, {
+    //         radius: radius,
+    //         color: options.fillColor,
+    //         antiAlias: false
+    //     });
+    // }
 }
 
-export function degreeToRadian(degree: number) {
-    return degree * .0174533;
+export function drawCircumference(canvas: Canvas, options: { radius: number, color: Color, antiAlias: boolean }) {
+    const radius = options.radius;
+    const theta_scale = 0.0001;        //Set lower to add more points
+    const sizeValue = (2.0 * Math.PI) / theta_scale;
+    let size = Math.floor(sizeValue) + 1;
+    let theta = 0;
+    for (let i = 0; i < size; i++) {
+        theta += (2.0 * Math.PI * theta_scale);
+        let x = radius * Math.cos(theta);
+        let y = radius * Math.sin(theta);
+        //draw where 0,0 is the leftmost and topmost coordinate
+        x += radius;
+        y += radius;
+
+        if (options.antiAlias) {
+            canvas.setAntiAliased(options.color, x, y);
+        } else {
+            canvas.setIfMissing(options.color, x, y);
+        }
+    }
 }

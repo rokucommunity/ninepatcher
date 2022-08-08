@@ -10,40 +10,82 @@ export class Color {
     private value!: RgbaArray;
 
     /**
+     * The red value
+     */
+    public get red() {
+        return this.value[0];
+    }
+    public set red(value) {
+        this.value[0] = snap(value);
+    }
+
+    /**
+     * Set the red value
+     */
+    public setRed(value: number) {
+        this.red = value;
+        return this;
+    }
+
+    /**
+     * The green value
+     */
+     public get green() {
+        return this.value[1];
+    }
+    public set green(value) {
+        this.value[1] = snap(value);
+    }
+
+    /**
+     * The green value
+     */
+    public setGreen(value: number) {
+        this.green = value;
+        return this;
+    }
+
+    /**
+     * The blue value
+     */
+    public get blue() {
+        return this.value[2];
+    }
+    public set blue(value) {
+        this.value[2] = snap(value);
+    }
+
+    /**
+     * Set the alpha value
+     */
+    public setBlue(value: number) {
+        this.blue = value;
+        return this;
+    }
+
+    /**
+     * Get the alpha value
+     */
+    public get alpha() {
+        return this.value[3];
+    }
+    public set alpha(value) {
+        this.value[3] = snap(value);
+    }
+
+    /**
+     * Set the alpha value
+     */
+    public setAlpha(value: number) {
+        this.alpha = value;
+        return this;
+    }
+
+    /**
      * Set the value (from any format)
      */
     public set(value: ColorLike) {
         this.value = toRgbaArray(value);
-    }
-
-    /**
-     * Get a specific part of the color
-     */
-    public getPart(part: ColorPart) {
-        if (part === 'red') {
-            return this.value[0];
-        } else if (part === 'blue') {
-            return this.value[1];
-        } else if (part === 'green') {
-            return this.value[2];
-        } else if (part === 'alpha') {
-            return this.value[3];
-        }
-    }
-
-    /**
-     * Set a specific part of the color
-     */
-    public setPart(part: ColorPart, value: number) {
-        if (part === 'red') {
-            return this.value[0] = value;
-        } else if (part === 'blue') {
-            return this.value[1] = value;
-        } else if (part === 'green') {
-            return this.value[2] = value;
-        } else if (part === 'alpha') {
-            return this.value[3] = value;
-        }
     }
 
     /**
@@ -52,9 +94,8 @@ export class Color {
     public merge(color: ColorLike) {
         const incoming = toRgbaArray(color);
         for (let i = 0; i < this.value.length; i++) {
-            this.value[i] = incoming[i] + this.value[i];
+            this.value[i] = snap(incoming[i] + this.value[i]);
         }
-        snapToBoundaries(this.value);
         return this;
     }
 
@@ -86,30 +127,29 @@ export class Color {
 }
 
 /**
- * Backfills any missing colors with black, and missing opacity with fully opaque
+ * Backfills any missing colors with black, and missing opacity with fully opaque, and snap to rgb value
  */
-function backfill(rgbaLike: number[]) {
+function sanitize(rgbaLike: number[]) {
     const result: RgbaArray = [0, 0, 0, 255];
     if (Array.isArray(rgbaLike)) {
         for (let i = 0; i < 4; i++) {
             const colorPart = rgbaLike[i];
             if (colorPart !== undefined && colorPart !== null && !isNaN(colorPart)) {
-                result[i] = colorPart;
+                result[i] = snap(colorPart);
             }
         }
         return result;
     }
 }
 
-function snapToBoundaries(rgba: RgbaArray) {
-    for (let i = 0; i < 4; i++) {
-        if (rgba[i] < 0) {
-            rgba[i] = 0;
-        } else if (rgba[i] > 255) {
-            rgba[i] = 255;
-        }
+function snap(value: number) {
+    if (value < 0) {
+        return 0;
     }
-    return rgba;
+    if (value > 255) {
+        return 255;
+    }
+    return value;
 }
 
 function isColor(value: any): value is Color {
@@ -158,9 +198,7 @@ function toRgbaArray(value: ColorLike) {
     }
 
     if (result) {
-        result = backfill(result);
-        //snap out-of-bounds values to min/max boundaryes
-        result = snapToBoundaries(result as RgbaArray);
+        result = sanitize(result);
     }
 
     if (result?.length !== 4) {
