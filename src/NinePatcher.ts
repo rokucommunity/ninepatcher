@@ -4,6 +4,7 @@ import type { ColorLike } from './Color';
 import { Color } from './Color';
 import { drawCircle, readJsoncSync } from './util';
 import * as fsExtra from 'fs-extra';
+import { wuCircle } from './wuAlgorithms';
 
 export class NinePatcher {
     private get cwd() {
@@ -39,6 +40,8 @@ export class NinePatcher {
         const height = (borderRadius * 2) + 2;
 
         const canvas = new Canvas(backgroundColor);
+
+        // wuCircle(canvas, borderRadius, borderColor);
         drawCircle(canvas, {
             radius: borderRadius,
             borderColor: borderColor,
@@ -59,6 +62,9 @@ export class NinePatcher {
         //draw the black stretch pixels
         canvas.setPixel(black, 0, centerPoint);
         canvas.setPixel(black, centerPoint, 0);
+
+        //write a transparent pixel in the last spot to ensure our output file is the correct dimensions
+        canvas.setPixel(new Color(0x00000000), width, height);
 
         const outPath = path.resolve(this.outDir, config.outFile);
         // console.log(canvas.toString());
