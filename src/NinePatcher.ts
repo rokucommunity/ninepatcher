@@ -57,8 +57,8 @@ export class NinePatcher {
         centerPoint = Math.floor(centerPoint);
 
         //draw the black stretch pixels
-        canvas.set(black, 0, centerPoint);
-        canvas.set(black, centerPoint, 0);
+        canvas.setPixel(black, 0, centerPoint);
+        canvas.setPixel(black, centerPoint, 0);
 
         const outPath = path.resolve(this.outDir, config.outFile);
         // console.log(canvas.toString());

@@ -1,25 +1,23 @@
-import type { Color } from './Color';
+import { Color } from './Color';
 import * as Jimp from 'jimp';
+import { colorAverage } from './util';
 
 export class Canvas {
     constructor(
         /**
          * The color of all background pixels
          */
-        private backgroundColor: Color
+        public backgroundColor: Color
     ) { }
 
     private grid: Array<Array<Color | undefined>> = [];
 
-    /**
-     * The dimensions of the canvas, based on the largest position created.
-     * That position is not guaranteed to be filled though.
-     */
-    public get dimensions() {
-        return {
-            width: Math.max(...this.grid.map(x => x.length)),
-            height: this.grid.length
-        };
+    public get width() {
+        return Math.max(...this.grid.map(x => x.length));
+    }
+
+    public get height() {
+        return this.grid.length;
     }
 
     private ensurePosition(x: number, y: number) {
@@ -35,38 +33,40 @@ export class Canvas {
     /**
      * Does the grid currently have a value at the given coordinates
      */
-    public isSet(x: number, y: number) {
+    public isPixelSet(x: number, y: number) {
         x = Math.round(x);
         y = Math.round(y);
-        return !!this.get(x, y);
+        return !!this.getPixel(x, y);
     }
 
     /**
      * Get the value at the specified coordinates. Returns `undefined` if the value was not set
      */
-    public get(x: number, y: number) {
+    public getPixel(x: number, y: number) {
         x = Math.round(x);
         y = Math.round(y);
         return this.grid[y]?.[x];
     }
 
     /**
-     * Set the value at the given coordinates
+     * Set the color for the given coordinate
      */
-    public set(color: Color, x: number, y: number) {
+    public setPixel(color: Color, x: number, y: number) {
         x = Math.round(x);
         y = Math.round(y);
         this.ensurePosition(x, y);
         this.grid[y][x] = color;
-        return color;
     }
 
     /**
      * Set the color for each of the given coordinates
      */
-    public setMany(color: Color, points: Array<[x: number, y: number]>) {
-        for (let point of points) {
-            this.set(color, ...point);
+    public setPixels(color: Color, ...points: Array<[x: number, y: number]>) {
+        for (let [x, y] of points) {
+            x = Math.round(x);
+            y = Math.round(y);
+            this.ensurePosition(x, y);
+            this.grid[y][x] = color;
         }
     }
 
@@ -86,7 +86,7 @@ export class Canvas {
     public setIfMissing(color: Color | undefined, x: number, y: number) {
         x = Math.round(x);
         y = Math.round(y);
-        if (!this.isSet(x, y)) {
+        if (!this.isPixelSet(x, y)) {
             this.ensurePosition(x, y);
 
             this.grid[y][x] = color;
@@ -94,15 +94,15 @@ export class Canvas {
         }
     }
 
-
     /**
      * Merge the incoming color with the color at the current coordinates.
      */
-    public merge(color: Color, x: number, y: number) {
-        const current = this.get(x, y) ?? this.backgroundColor.clone();
-        const merged = current.merge(color);
-        this.set(merged, x, y);
-        return merged;
+    public mergePixels(color: Color, ...pixels: Array<[x: number, y: number]>) {
+        for (const [x, y] of pixels) {
+            const current = this.getPixel(x, y) ?? this.backgroundColor.clone();
+            const merged = current.merge(color);
+            this.setPixels(merged, [x, y]);
+        }
     }
 
     /**
@@ -118,20 +118,50 @@ export class Canvas {
                 let percentY = 1 - Math.abs(y - roundedY);
                 let percent = percentX * percentY;
 
-                const currentAlpha = (this.get(x, y) ?? color.clone()).alpha;
+                const currentAlpha = (this.getPixel(x, y) ?? color.clone()).alpha;
                 const additionalAlpha = 255 * percent;
                 //make the pixel more solid by this percentage
                 const antiAliasedColor = color.clone().setAlpha(
                     currentAlpha + additionalAlpha
                 );
 
-                this.set(
+                this.setPixels(
                     antiAliasedColor,
-                    roundedX,
-                    roundedY
+                    [roundedX, roundedY]
                 );
             }
         }
+    }
+
+    public boxBlur(defaultColor: Color, opacityPercent: number) {
+        const result = new Canvas(this.backgroundColor);
+        const { width, height } = this;
+        for (let y = 0; y < this.grid.length; y++) {
+            const row = this.grid[y];
+            for (let x = 0; x < row.length; x++) {
+                //skip these out of bounds pixels
+                if (x < 1 || y < 1 || x + 1 === width || y + 1 === height) {
+                    continue;
+                }
+                // Set P to the average of 9 pixels:
+                const color = colorAverage(
+                    defaultColor,
+                    [
+                        this.getPixel(x - 1, y + 1), // Top left
+                        this.getPixel(x + 0, y + 1), // Top center
+                        this.getPixel(x + 1, y + 1), // Top right
+                        this.getPixel(x - 1, y + 0), // Mid left
+                        this.getPixel(x + 0, y + 0), // Current pixel
+                        this.getPixel(x + 1, y + 0), // Mid right
+                        this.getPixel(x - 1, y - 1), // Low left
+                        this.getPixel(x + 0, y - 1), // Low center
+                        this.getPixel(x + 1, y - 1) // Low right
+                    ]
+                );
+                result.setPixels(color.setAlpha(color.alpha * opacityPercent), [x, y]);
+            }
+        }
+        this.grid = result.grid;
     }
 
     public translate(x: number, y: number) {
@@ -177,5 +207,14 @@ export class Canvas {
         return image.write(outPath);
     }
 
-
+    public clone() {
+        const clone = new Canvas(this.backgroundColor);
+        const grid: typeof this.grid = new Array(this.height);
+        for (let row of this.grid) {
+            grid.push(
+                row.map(x => x?.clone())
+            );
+        }
+        return clone;
+    }
 }

@@ -1,5 +1,5 @@
 import type { Canvas } from './Canvas';
-import type { Color } from './Color';
+import { Color } from './Color';
 import type { ParseError } from 'jsonc-parser';
 import { parse as parseJsonc, printParseErrorCode } from 'jsonc-parser';
 import * as fsExtra from 'fs-extra';
@@ -31,10 +31,15 @@ export function drawCircle(canvas: Canvas, options: { radius: number; borderColo
         xOffset: borderRadius,
         yOffset: borderRadius
     });
-    canvas.setMany(options.borderColor, borderPoints);
+    canvas.setPixels(options.borderColor, ...borderPoints);
+    canvas.boxBlur(
+        options.borderColor.clone().setAlpha(0),
+        0.7
+    );
+    canvas.setPixels(options.borderColor.setAlpha(230), ...borderPoints);
 
     //fill the circle
-    for (let fillRadius = borderRadius; fillRadius >= 0; fillRadius--) {
+    for (let fillRadius = borderRadius - 1; fillRadius >= 0; fillRadius--) {
         const points = getCircumference({
             strokeWidth: 1,
             radius: fillRadius,
@@ -43,7 +48,7 @@ export function drawCircle(canvas: Canvas, options: { radius: number; borderColo
             //draw these relative to the center of the outer circle
             yOffset: borderRadius
         });
-        canvas.setIfMissingMany(options.fillColor, points);
+        canvas.setPixels(options.fillColor, ...points);
     }
 }
 
@@ -68,4 +73,18 @@ export function getCircumference(options: { radius: number; strokeWidth: number;
         result.push([x, y]);
     }
     return result;
+}
+
+/**
+ * Build a new color based on the average of all colors provided
+ */
+export function colorAverage(defaultColor: Color, colors: Array<Color | undefined>) {
+    const sums = [0, 0, 0, 0];
+    for (const color of colors) {
+        const rgba = (color ?? defaultColor).toRgbaArray();
+        for (let i = 0; i < rgba.length; i++) {
+            sums[i] += rgba[i];
+        }
+    }
+    return new Color(sums.map(x => x / colors.length));
 }
