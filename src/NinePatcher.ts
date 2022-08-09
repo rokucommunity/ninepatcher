@@ -4,7 +4,6 @@ import type { ColorLike } from './Color';
 import { Color } from './Color';
 import { drawCircle, readJsoncSync } from './util';
 import * as fsExtra from 'fs-extra';
-import { wuCircle } from './wuAlgorithms';
 
 export class NinePatcher {
     private get cwd() {
@@ -41,7 +40,6 @@ export class NinePatcher {
 
         const canvas = new Canvas(backgroundColor);
 
-        // wuCircle(canvas, borderRadius, borderColor);
         drawCircle(canvas, {
             radius: borderRadius,
             borderColor: borderColor,
