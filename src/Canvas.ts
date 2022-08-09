@@ -1,4 +1,4 @@
-import { Color } from './Color';
+import type { Color } from './Color';
 import * as Jimp from 'jimp';
 import { colorAverage } from './util';
 
@@ -10,32 +10,64 @@ export class Canvas {
         public backgroundColor: Color
     ) { }
 
-    private grid: Array<Array<Color | undefined>> = [];
+    /**
+     * A map of rows, containing columns, all indexed by their x or y coordinate.
+     * Index by Y first, then X
+     */
+    private grid = new Map<number, Map<number, Color>>();
+
+    /**
+     * Get the lowest-defined x value
+     */
+    private get minX() {
+        const xValues: number[] = [];
+        for (const [, row] of this.grid) {
+            for (const [x] of row) {
+                xValues.push(x);
+            }
+        }
+        return Math.min(...xValues);
+    }
+
+    /**
+     * Get the highest-defined x value
+     */
+    private get maxX() {
+        const xValues: number[] = [];
+        for (const [, row] of this.grid) {
+            for (const [x] of row) {
+                xValues.push(x);
+            }
+        }
+        return Math.max(...xValues);
+    }
+
+    /**
+     * Get the lowest-defined y value
+     */
+    private get minY() {
+        return Math.max(...this.grid.keys());
+    }
+
+    /**
+     * Get the highest-defined y value
+     */
+    public get maxY() {
+        return Math.max(...this.grid.keys());
+    }
 
     public get width() {
-        return Math.max(...this.grid.map(x => x.length));
+        return this.maxX - this.minX;
     }
 
     public get height() {
-        return this.grid.length;
-    }
-
-    private ensurePosition(x: number, y: number) {
-        while (this.grid.length <= y) {
-            this.grid.push([]);
-        }
-        const row = this.grid[y];
-        for (let i = row.length; i <= x; i++) {
-            row.push(undefined);
-        }
+        return this.maxY - this.minY;
     }
 
     /**
      * Does the grid currently have a value at the given coordinates
      */
     public isPixelSet(x: number, y: number) {
-        x = Math.round(x);
-        y = Math.round(y);
         return !!this.getPixel(x, y);
     }
 
@@ -45,7 +77,20 @@ export class Canvas {
     public getPixel(x: number, y: number) {
         x = Math.round(x);
         y = Math.round(y);
-        return this.grid[y]?.[x];
+        return this.grid.get(y)?.get(x);
+    }
+
+    /**
+     * Get the row at the specified y coordinate. If it doesn't exist, create it
+     */
+    private getRow(y: number) {
+        y = Math.round(y);
+        let result = this.grid.get(y);
+        if (!result) {
+            result = new Map();
+            this.grid.set(y, result);
+        }
+        return result;
     }
 
     /**
@@ -53,9 +98,20 @@ export class Canvas {
      */
     public setPixel(color: Color, x: number, y: number) {
         x = Math.round(x);
+        this.getRow(y).set(x, color);
+    }
+
+    /**
+     * Delete a pixel at the specified location
+     */
+    public deletePixel(x: number, y: number) {
+        x = Math.round(x);
         y = Math.round(y);
-        this.ensurePosition(x, y);
-        this.grid[y][x] = color;
+        const row = this.getRow(y);
+        row.delete(x);
+        if (row.size === 0) {
+            this.grid.delete(y);
+        }
     }
 
     /**
@@ -63,10 +119,7 @@ export class Canvas {
      */
     public setPixels(color: Color, ...points: Array<[x: number, y: number]>) {
         for (let [x, y] of points) {
-            x = Math.round(x);
-            y = Math.round(y);
-            this.ensurePosition(x, y);
-            this.grid[y][x] = color;
+            this.setPixel(color, x, y);
         }
     }
 
@@ -75,22 +128,16 @@ export class Canvas {
      */
     public setIfMissingMany(color: Color, points: Array<[x: number, y: number]>) {
         for (let point of points) {
-            this.setIfMissing(color, ...point);
+            this.setPixelIfMissing(color, ...point);
         }
     }
-
 
     /**
      * Set the value at the given coordinates only if no image data is there yet.
      */
-    public setIfMissing(color: Color | undefined, x: number, y: number) {
-        x = Math.round(x);
-        y = Math.round(y);
+    public setPixelIfMissing(color: Color, x: number, y: number) {
         if (!this.isPixelSet(x, y)) {
-            this.ensurePosition(x, y);
-
-            this.grid[y][x] = color;
-            return color;
+            this.setPixel(color, x, y);
         }
     }
 
@@ -135,10 +182,9 @@ export class Canvas {
 
     public boxBlur(defaultColor: Color, opacityPercent: number) {
         const result = new Canvas(this.backgroundColor);
-        const { width, height } = this;
-        for (let y = 0; y < this.grid.length; y++) {
-            const row = this.grid[y];
-            for (let x = 0; x < row.length; x++) {
+        const { minX, minY, maxX, maxY, width, height } = this;
+        for (let y = minY; y < maxY; y++) {
+            for (let x = minX; x < maxX; x++) {
                 //skip these out of bounds pixels
                 if (x < 1 || y < 1 || x + 1 === width || y + 1 === height) {
                     continue;
@@ -164,44 +210,29 @@ export class Canvas {
         this.grid = result.grid;
     }
 
-    public translate(x: number, y: number) {
-        //add more rows above y
-        for (let yCount = 0; yCount < Math.abs(y); yCount++) {
-            if (y > 0) {
-                //add new row to top
-                this.grid.unshift([]);
-            } else {
-                //remove top row
-                this.grid.shift();
-            }
-        }
+    /**
+     * Translate all the pixels by this amount
+     */
+    public translate(xOffset: number, yOffset: number) {
+        const canvas = new Canvas(this.backgroundColor);
 
-        for (let xCount = 0; xCount < Math.abs(x); xCount++) {
-            for (let row of this.grid) {
-                if (x > 0) {
-                    //add new item to left
-                    row.unshift(undefined);
-                } else {
-                    //remove leftmost cell
-                    row.shift();
-                }
+        for (const [y, row] of this.grid) {
+            for (const [x, color] of row) {
+                canvas.setPixel(color, x + xOffset, y + yOffset);
             }
         }
+        this.grid = canvas.grid;
     }
 
-    public write(outPath: string, width: number, height: number) {
-        let image = new Jimp(width, height, this.backgroundColor.toInteger(), (err) => {
+    public write(outPath: string) {
+        let image = new Jimp(this.maxX, this.maxY, this.backgroundColor.toInteger(), (err) => {
             if (err) {
                 throw err;
             }
         });
-        for (let y = 0; y < this.grid.length; y++) {
-            const row = this.grid[y];
-            for (let x = 0; x < row.length; x++) {
-                const pixel = row[x];
-                if (pixel) {
-                    image.setPixelColor(pixel?.toInteger(), x, y);
-                }
+        for (const [y, row] of this.grid) {
+            for (const [x, color] of row) {
+                image.setPixelColor(color?.toInteger(), x, y);
             }
         }
         return image.write(outPath);
@@ -209,11 +240,10 @@ export class Canvas {
 
     public clone() {
         const clone = new Canvas(this.backgroundColor);
-        const grid: typeof this.grid = new Array(this.height);
-        for (let row of this.grid) {
-            grid.push(
-                row.map(x => x?.clone())
-            );
+        for (const [y, row] of this.grid) {
+            for (const [x, color] of row) {
+                clone.setPixel(color, x, y);
+            }
         }
         return clone;
     }
