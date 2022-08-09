@@ -34,6 +34,7 @@ export class NinePatcher {
         const borderColor = new Color(config.borderColor ?? fillColor);
         const borderWidth = config.borderWidth ?? 1;
         const borderRadius = config.borderRadius ?? 5;
+        //plus 2 to account for the repeater bar on top and left, and transparent bar on right and bottom
         const width = (borderRadius * 2) + 2;
         const height = (borderRadius * 2) + 2;
 

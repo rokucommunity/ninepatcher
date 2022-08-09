@@ -42,13 +42,32 @@ export class Canvas {
     /**
      * Set the value at the given coordinates
      */
-    public set(color: Color | undefined, x: number, y: number) {
+    public set(color: Color, x: number, y: number) {
         x = Math.round(x);
         y = Math.round(y);
         this.ensurePosition(x, y);
         this.grid[y][x] = color;
         return color;
     }
+
+    /**
+     * Set the color for each of the given coordinates
+     */
+    public setMany(color: Color, points: Array<[x: number, y: number]>) {
+        for (let point of points) {
+            this.set(color, ...point);
+        }
+    }
+
+    /**
+     * Set the color for each of the given coordinates
+     */
+    public setIfMissingMany(color: Color, points: Array<[x: number, y: number]>) {
+        for (let point of points) {
+            this.setIfMissing(color, ...point);
+        }
+    }
+
 
     /**
      * Set the value at the given coordinates only if no image data is there yet.

@@ -24,31 +24,30 @@ export function readJsoncSync<T>(path: string) {
 }
 
 export function drawCircle(canvas: Canvas, options: { radius: number; borderColor: Color; borderWidth: number; fillColor: Color }) {
-    drawCircumference(canvas, {
+    const borderPoints = getCircumference({
         radius: options.radius,
-        color: options.borderColor,
         strokeWidth: options.borderWidth,
-        antiAlias: false,
         xOffset: options.radius,
         yOffset: options.radius
     });
+    canvas.setMany(options.borderColor, borderPoints);
 
     //fill the circle
     for (let radius = options.radius; radius >= 0; radius--) {
-        drawCircumference(canvas, {
+        const points = getCircumference({
             strokeWidth: 1,
             radius: radius,
-            color: options.fillColor,
-            antiAlias: false,
             //draw these relative to the center of the outer circle
             xOffset: options.radius,
             //draw these relative to the center of the outer circle
             yOffset: options.radius
         });
+        canvas.setIfMissingMany(options.fillColor, points);
     }
 }
 
-export function drawCircumference(canvas: Canvas, options: { radius: number; color: Color; antiAlias: boolean; strokeWidth: number; xOffset: number; yOffset: number }) {
+export function getCircumference(options: { radius: number; strokeWidth: number; xOffset: number; yOffset: number }) {
+    const result: Array<[number, number]> = [];
     const strokeWidth = options.strokeWidth ?? 1;
     const xOffset = options.xOffset ?? options.radius;
     const yOffset = options.yOffset ?? options.radius;
@@ -56,6 +55,7 @@ export function drawCircumference(canvas: Canvas, options: { radius: number; col
     const radius = Math.abs(options.radius - (strokeWidth / 2));
     const thetaScale = 0.001; //Set lower to add more points
     const sizeValue = (2.0 * Math.PI) / thetaScale;
+
     let stepCount = Math.floor(sizeValue) + 1;
     let theta = 0;
     for (let i = 0; i < stepCount; i++) {
@@ -64,11 +64,7 @@ export function drawCircumference(canvas: Canvas, options: { radius: number; col
         let y = radius * Math.sin(theta);
         x += xOffset;
         y += yOffset;
-
-        if (options.antiAlias) {
-            canvas.setAntiAliased(options.color, x, y);
-        } else {
-            canvas.setIfMissing(options.color, x, y);
-        }
+        result.push([x, y]);
     }
+    return result;
 }
