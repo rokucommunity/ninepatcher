@@ -24,23 +24,24 @@ export function readJsoncSync<T>(path: string) {
 }
 
 export function drawCircle(canvas: Canvas, options: { radius: number; borderColor: Color; borderWidth: number; fillColor: Color }) {
+    const borderRadius = Math.abs(options.radius - (options.borderWidth / 2));
     const borderPoints = getCircumference({
-        radius: options.radius,
+        radius: borderRadius,
         strokeWidth: options.borderWidth,
-        xOffset: options.radius,
-        yOffset: options.radius
+        xOffset: borderRadius,
+        yOffset: borderRadius
     });
     canvas.setMany(options.borderColor, borderPoints);
 
     //fill the circle
-    for (let radius = options.radius; radius >= 0; radius--) {
+    for (let fillRadius = borderRadius; fillRadius >= 0; fillRadius--) {
         const points = getCircumference({
             strokeWidth: 1,
-            radius: radius,
+            radius: fillRadius,
             //draw these relative to the center of the outer circle
-            xOffset: options.radius,
+            xOffset: borderRadius,
             //draw these relative to the center of the outer circle
-            yOffset: options.radius
+            yOffset: borderRadius
         });
         canvas.setIfMissingMany(options.fillColor, points);
     }
@@ -48,11 +49,11 @@ export function drawCircle(canvas: Canvas, options: { radius: number; borderColo
 
 export function getCircumference(options: { radius: number; strokeWidth: number; xOffset: number; yOffset: number }) {
     const result: Array<[number, number]> = [];
-    const strokeWidth = options.strokeWidth ?? 1;
+    // const strokeWidth = options.strokeWidth ?? 1;
     const xOffset = options.xOffset ?? options.radius;
     const yOffset = options.yOffset ?? options.radius;
     //the actual radius should represent the center of the line
-    const radius = Math.abs(options.radius - (strokeWidth / 2));
+    const { radius } = options;
     const thetaScale = 0.001; //Set lower to add more points
     const sizeValue = (2.0 * Math.PI) / thetaScale;
 

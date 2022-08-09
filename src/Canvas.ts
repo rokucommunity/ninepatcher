@@ -11,6 +11,17 @@ export class Canvas {
 
     private grid: Array<Array<Color | undefined>> = [];
 
+    /**
+     * The dimensions of the canvas, based on the largest position created.
+     * That position is not guaranteed to be filled though.
+     */
+    public get dimensions() {
+        return {
+            width: Math.max(...this.grid.map(x => x.length)),
+            height: this.grid.length
+        };
+    }
+
     private ensurePosition(x: number, y: number) {
         while (this.grid.length <= y) {
             this.grid.push([]);
@@ -149,7 +160,7 @@ export class Canvas {
     }
 
     public write(outPath: string, width: number, height: number) {
-        let image = new Jimp(width + 2, height + 2, this.backgroundColor.toInteger(), (err, image) => {
+        let image = new Jimp(width, height, this.backgroundColor.toInteger(), (err) => {
             if (err) {
                 throw err;
             }
