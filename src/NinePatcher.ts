@@ -66,7 +66,7 @@ export class NinePatcher {
 
         const outPath = path.resolve(this.outDir, config.outFile);
         // console.log(canvas.toString());
-        canvas.write(outPath, width, height);
+        canvas.write(outPath);
     }
 
     private config!: NinePatcherConfig;
