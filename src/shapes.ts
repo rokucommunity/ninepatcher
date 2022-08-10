@@ -120,7 +120,7 @@ export function wuCircle(r: number): opacity_bitmap {
     const rsq = r ** 2;
     const ffd = Math.round(r / Math.sqrt(2)); // forty-five-degree coord
 
-    for (let xi = 0; xi <= ffd + 1; xi++) {
+    for (let xi = 0; xi <= ffd; xi++) {
         const yj = Math.sqrt(rsq - (xi ** 2)); // the "step 2" formula noted above
         const frc = fpart(yj);
         const flr = Math.floor(yj);
@@ -128,12 +128,20 @@ export function wuCircle(r: number): opacity_bitmap {
         plot_4_points(xi, flr + 1, frc, p4_params);
     }
 
-    for (let yi = 0; yi <= ffd + 1; yi++) {
+    for (let yi = 0; yi <= ffd; yi++) {
         const xj = Math.sqrt(rsq - (yi ** 2));
         const frc = fpart(xj);
         const flr = Math.floor(xj);
         plot_4_points(flr, yi, 1 - frc, p4_params);
         plot_4_points(flr + 1, yi, frc, p4_params);
+    }
+
+    //add the exact points for 0, 90, 180, 270 degrees (they're missing for some reason)
+    for (let angle = 0; angle <= 360; angle += 90) {
+        const x = Math.round(r * Math.sin(Math.PI * 2 * angle / 360));
+        const y = Math.round(r * Math.cos(Math.PI * 2 * angle / 360));
+        const pt = (y * result.width) + x + p4_params.center_pix;
+        result.arr[pt] = high_opac;
     }
     return result;
 }
