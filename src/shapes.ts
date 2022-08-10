@@ -79,100 +79,66 @@ export function wuLine(x0: number, y0: number, x1: number, y1: number, canvas: C
 
 type pixel_opacity_array = number[];
 
-interface opacity_bitmap {
+interface WuCircleResult {
     arr: pixel_opacity_array;
+    center_pix: number;
     width: number;
     height: number;
 }
 
-interface plot4_params_type {
-    arr: pixel_opacity_array;
-    center_pix: number;
-    width: number;
-}
-
 const high_opac = 255;
 
-
-export function wuCircle(radius: number): opacity_bitmap {
-    const result: opacity_bitmap = {} as any;
+export function wuCircle(radius: number): WuCircleResult {
+    const result: WuCircleResult = {} as any;
     result.width = (Math.ceil(radius) * 2) + 3;
     result.height = result.width;
     result.arr = new Array(result.width ** 2);
+    result.center_pix = (Math.ceil(radius) + 1) * (result.width + 1);
 
     if (radius <= 0) {
         return result;
     }
 
-    const p4_params: plot4_params_type = {} as any;
-    p4_params.arr = result.arr;
-    p4_params.width = result.width;
-    p4_params.center_pix = (Math.ceil(radius) + 1) * (p4_params.width + 1);
-
-    // assuming momentarily that r is an integer, let's find center_pix (r,r)
-    // first get the row: it is at r*width. Then to get the column, add r.
-    // Thus (r,r) is at r*width+r = r*(width+1) -- this holds true for any r
-    // r is real, so take ceil(r); also add some wiggle room, so add 1: ceil(r)+1
-    // Thus: (ceil(r)+1) * (width+1)
-
-    // Now here's the stuff you've been looking for:
-
-    const radiusSquared = radius ** 2;
-    const fortyFiveDegrees = Math.round(radius / Math.sqrt(2)); // forty-five-degree coord
+    const fortyFiveDegrees = Math.round(radius / Math.sqrt(2));
 
     for (let x = 0; x <= fortyFiveDegrees; x++) {
-        const yj = Math.sqrt(radiusSquared - (x ** 2)); // the "step 2" formula noted above
+        const yj = Math.sqrt((radius ** 2) - (x ** 2));
         const frc = fpart(yj);
         const yInteger = Math.floor(yj);
-        plot_4_points(x, yInteger, 1 - frc, p4_params);
-        plot_4_points(x, yInteger + 1, frc, p4_params);
+        plot_4_points(x, yInteger, 1 - frc, result);
+        plot_4_points(x, yInteger + 1, frc, result);
     }
 
     for (let y = 0; y <= fortyFiveDegrees; y++) {
-        const xj = Math.sqrt(radiusSquared - (y ** 2));
+        const xj = Math.sqrt((radius ** 2) - (y ** 2));
         const frc = fpart(xj);
         const xInteger = Math.floor(xj);
-        plot_4_points(xInteger, y, 1 - frc, p4_params);
-        plot_4_points(xInteger + 1, y, frc, p4_params);
+        plot_4_points(xInteger, y, 1 - frc, result);
+        plot_4_points(xInteger + 1, y, frc, result);
     }
 
-    //add the exact points for 0, 90, 180, 270 degrees (they're missing for some reason)
-    for (let angle = 0; angle <= 360; angle += 90) {
-        const x = Math.round(radius * Math.sin(Math.PI * 2 * angle / 360));
-        const y = Math.round(radius * Math.cos(Math.PI * 2 * angle / 360));
-        const pt = (y * result.width) + x + p4_params.center_pix;
-        result.arr[pt] = high_opac;
-    }
     return result;
 }
 
-function plot_4_points(x: number, y: number, f: number, p4_params: plot4_params_type, take_max = false) {
-    function plot(pt: number) {
-        pt += p4_params.center_pix;
+function plot_4_points(x: number, y: number, f: number, result: WuCircleResult, take_max = false) {
+    function plot(x: number, y: number) {
+        const yw = y * result.width;
+        const idx = yw + x + result.center_pix;
         if (!take_max) {
-            p4_params.arr[pt] = opac
+            result.arr[idx] = opac
         } else {
             // don't overwrite a touched pixel with a less intense value
-            p4_params.arr[pt] = Math.max(p4_params.arr[pt], opac);
+            result.arr[idx] = Math.max(result.arr[idx], opac);
         }
     }
     const opac = round(high_opac * f);  // the max opacity value
     if (opac === 0) {
         return;
     }
-    let yw = y * p4_params.width;  // I could call plot (x,y) but then I'd be calculating y*width over and over
-    if (x > 0 && y > 0) {
-        plot(x + yw);
-        plot(x - yw);
-        plot(-x + yw);
-        plot(-x - yw);
-    } else if (x = 0) {
-        plot(x + yw);
-        plot(x - yw);
-    } else if (y = 0) {
-        plot(x + yw);
-        plot(-x + yw);
-    }
+    plot(x, y);
+    plot(x, -y);
+    plot(-x, y);
+    plot(-x, -y);
 }
 
 
