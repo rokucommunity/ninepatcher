@@ -3,11 +3,6 @@ import type { ColorLike, RgbaArray } from './Color';
 import { Color } from './Color';
 
 describe('Color', () => {
-    function expectColor(input: ColorLike, expected: RgbaArray) {
-        const color = new Color(input);
-        expect(color.toRgbaArray()).to.eql(expected);
-    }
-
     it('parses hex', () => {
         expectColor('#01020304', [1, 2, 3, 4]);
     });
@@ -124,3 +119,8 @@ describe('Color', () => {
         });
     });
 });
+
+export function expectColor(input: ColorLike | undefined, expected: ColorLike) {
+    const color = new Color(input as any);
+    expect(color.toRgbaArray()).to.eql(new Color(expected).toRgbaArray());
+}

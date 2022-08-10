@@ -7,6 +7,9 @@ export class Color {
         this.set(value);
     }
 
+    /**
+     * Stores the rgb and a values as integers within the range (0 - 255)
+     */
     private value!: RgbaArray;
 
     /**
@@ -126,7 +129,53 @@ export class Color {
     }
 
     public toString() {
-        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha}`;
+        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha / 255}`;
+    }
+
+    /**
+     * Blend one or more colors together into a single color.
+     * The first color is the bottom color
+     */
+    public static blend(...colors: Color[]): Color {
+        const args = colors.map(x => {
+            return [
+                x.red,
+                x.green,
+                x.blue,
+                x.alpha / 255
+            ];
+        });
+        let base = [0, 0, 0, 0];
+        let mix = [] as unknown as RgbaArray;
+        let added;
+        while ((added = args.shift())) {
+            if (typeof added[3] === 'undefined') {
+                added[3] = 1;
+            }
+            // check if both alpha channels exist.
+            if (base[3] && added[3]) {
+                mix = [0, 0, 0, 0];
+                // alpha
+                mix[3] = 1 - ((1 - added[3]) * (1 - base[3]));
+                // red
+                mix[0] = Math.round((added[0] * added[3] / mix[3]) + (base[0] * base[3] * (1 - added[3]) / mix[3]));
+                // green
+                mix[1] = Math.round((added[1] * added[3] / mix[3]) + (base[1] * base[3] * (1 - added[3]) / mix[3]));
+                // blue
+                mix[2] = Math.round((added[2] * added[3] / mix[3]) + (base[2] * base[3] * (1 - added[3]) / mix[3]));
+
+            } else if (added) {
+                mix = added as any;
+            } else {
+                mix = base as any;
+            }
+            base = mix;
+        }
+        if (mix?.length === 4) {
+            mix[3] = snap(mix[3] * 255);
+            return new Color(mix as any);
+        }
+        return undefined as unknown as Color;
     }
 }
 
@@ -161,7 +210,7 @@ function isColor(value: any): value is Color {
 }
 
 /**
- * Take any color value and turn it into an rgba array
+ * Take any color value and turn it into an rgba array (each representing 0-255, even alpha)
  */
 function toRgbaArray(value: ColorLike) {
     let result: number[] | undefined;

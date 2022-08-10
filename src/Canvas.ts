@@ -1,4 +1,4 @@
-import type { Color } from './Color';
+import { Color } from './Color';
 import * as Jimp from 'jimp';
 import { colorAverage } from './util';
 
@@ -14,7 +14,7 @@ export class Canvas {
      * A map of rows, containing columns, all indexed by their x or y coordinate.
      * Index by Y first, then X
      */
-    private grid = new Map<number, Map<number, Color>>();
+    private grid = new Map<number, Map<number, Color[]>>();
 
     /**
      * Get the lowest-defined x value
@@ -77,47 +77,59 @@ export class Canvas {
     public getPixel(x: number, y: number) {
         x = Math.round(x);
         y = Math.round(y);
-        return this.grid.get(y)?.get(x);
+        const colorStack = this.grid.get(y)?.get(x);
+        if (colorStack) {
+            return Color.blend(this.backgroundColor, ...colorStack);
+        }
     }
 
     /**
      * Get the row at the specified y coordinate. If it doesn't exist, create it
      */
-    private getRow(y: number) {
+    private getCell(x: number, y: number) {
         y = Math.round(y);
-        let result = this.grid.get(y);
-        if (!result) {
-            result = new Map();
-            this.grid.set(y, result);
+        let row = this.grid.get(y);
+        if (!row) {
+            row = new Map();
+            this.grid.set(y, row);
         }
-        return result;
+        let cell = row.get(x);
+        if (!cell) {
+            cell = [];
+            row.set(x, cell);
+        }
+
+        return cell;
     }
 
     /**
-     * Set the color for the given coordinate
+     * Set the color (or color stack) for the given coordinate.
      */
-    public setPixel(color: Color, x: number, y: number) {
+    public setPixel(color: Color | Color[], x: number, y: number) {
+        const colorStack = Array.isArray(color) ? color : [color];
         x = Math.round(x);
-        this.getRow(y).set(x, color);
+        this.getCell(x, y).push(...colorStack);
     }
 
     /**
-     * Delete a pixel at the specified location
+     * Delete a pixel at the specified location. This deletes the whole stack of pixels at that position.
      */
     public deletePixel(x: number, y: number) {
         x = Math.round(x);
         y = Math.round(y);
-        const row = this.getRow(y);
-        row.delete(x);
-        if (row.size === 0) {
-            this.grid.delete(y);
+        const row = this.grid.get(y);
+        if (row) {
+            row.delete(x);
+            if (row.size === 0) {
+                this.grid.delete(y);
+            }
         }
     }
 
     /**
      * Set the color for each of the given coordinates
      */
-    public setPixels(color: Color, ...points: Array<[x: number, y: number]>) {
+    public setPixels(color: Color | Color[], ...points: Array<[x: number, y: number]>) {
         for (let [x, y] of points) {
             this.setPixel(color, x, y);
         }
@@ -142,75 +154,6 @@ export class Canvas {
     }
 
     /**
-     * Merge the incoming color with the color at the current coordinates.
-     */
-    public mergePixels(color: Color, ...pixels: Array<[x: number, y: number]>) {
-        for (const [x, y] of pixels) {
-            const current = this.getPixel(x, y) ?? this.backgroundColor.clone();
-            const merged = current.merge(color);
-            this.setPixels(merged, [x, y]);
-        }
-    }
-
-    /**
-     * Set a pixel color, and anti-alias the pixels around it
-     */
-    public setAntiAliased(color: Color, x: number, y: number) {
-        //get a new color with the alpha value totally blanked out
-        color = color.clone().setAlpha(0);
-
-        for (let roundedX = Math.floor(x); roundedX < Math.ceil(x); roundedX++) {
-            for (let roundedY = Math.floor(y); roundedY < Math.ceil(y); roundedY++) {
-                let percentX = 1 - Math.abs(x - roundedX);
-                let percentY = 1 - Math.abs(y - roundedY);
-                let percent = percentX * percentY;
-
-                const currentAlpha = (this.getPixel(x, y) ?? color.clone()).alpha;
-                const additionalAlpha = 255 * percent;
-                //make the pixel more solid by this percentage
-                const antiAliasedColor = color.clone().setAlpha(
-                    currentAlpha + additionalAlpha
-                );
-
-                this.setPixels(
-                    antiAliasedColor,
-                    [roundedX, roundedY]
-                );
-            }
-        }
-    }
-
-    public boxBlur(defaultColor: Color, opacityPercent: number) {
-        const result = new Canvas(this.backgroundColor);
-        const { minX, minY, maxX, maxY, width, height } = this;
-        for (let y = minY; y < maxY; y++) {
-            for (let x = minX; x < maxX; x++) {
-                //skip these out of bounds pixels
-                if (x < 1 || y < 1 || x + 1 === width || y + 1 === height) {
-                    continue;
-                }
-                // Set P to the average of 9 pixels:
-                const color = colorAverage(
-                    defaultColor,
-                    [
-                        this.getPixel(x - 1, y + 1), // Top left
-                        this.getPixel(x + 0, y + 1), // Top center
-                        this.getPixel(x + 1, y + 1), // Top right
-                        this.getPixel(x - 1, y + 0), // Mid left
-                        this.getPixel(x + 0, y + 0), // Current pixel
-                        this.getPixel(x + 1, y + 0), // Mid right
-                        this.getPixel(x - 1, y - 1), // Low left
-                        this.getPixel(x + 0, y - 1), // Low center
-                        this.getPixel(x + 1, y - 1) // Low right
-                    ]
-                );
-                result.setPixels(color.setAlpha(color.alpha * opacityPercent), [x, y]);
-            }
-        }
-        this.grid = result.grid;
-    }
-
-    /**
      * Translate all the pixels by this amount
      */
     public translate(xOffset: number, yOffset: number) {
@@ -231,8 +174,9 @@ export class Canvas {
             }
         });
         for (const [y, row] of this.grid) {
-            for (const [x, color] of row) {
-                image.setPixelColor(color?.toInteger(), x, y);
+            for (const [x, colorStack] of row) {
+                const finalColor = Color.blend(this.backgroundColor, ...colorStack);
+                image.setPixelColor(finalColor?.toInteger(), x, y);
             }
         }
         return image.write(outPath);
