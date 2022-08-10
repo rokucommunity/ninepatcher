@@ -94,20 +94,20 @@ interface plot4_params_type {
 const high_opac = 255;
 
 
-export function wuCircle(r: number): opacity_bitmap {
+export function wuCircle(radius: number): opacity_bitmap {
     const result: opacity_bitmap = {} as any;
-    result.width = (Math.ceil(r) * 2) + 3;
+    result.width = (Math.ceil(radius) * 2) + 3;
     result.height = result.width;
     result.arr = new Array(result.width ** 2);
 
-    if (r <= 0) {
+    if (radius <= 0) {
         return result;
     }
 
     const p4_params: plot4_params_type = {} as any;
     p4_params.arr = result.arr;
     p4_params.width = result.width;
-    p4_params.center_pix = (Math.ceil(r) + 1) * (p4_params.width + 1);
+    p4_params.center_pix = (Math.ceil(radius) + 1) * (p4_params.width + 1);
 
     // assuming momentarily that r is an integer, let's find center_pix (r,r)
     // first get the row: it is at r*width. Then to get the column, add r.
@@ -117,29 +117,29 @@ export function wuCircle(r: number): opacity_bitmap {
 
     // Now here's the stuff you've been looking for:
 
-    const rsq = r ** 2;
-    const ffd = Math.round(r / Math.sqrt(2)); // forty-five-degree coord
+    const radiusSquared = radius ** 2;
+    const fortyFiveDegrees = Math.round(radius / Math.sqrt(2)); // forty-five-degree coord
 
-    for (let xi = 0; xi <= ffd; xi++) {
-        const yj = Math.sqrt(rsq - (xi ** 2)); // the "step 2" formula noted above
+    for (let x = 0; x <= fortyFiveDegrees; x++) {
+        const yj = Math.sqrt(radiusSquared - (x ** 2)); // the "step 2" formula noted above
         const frc = fpart(yj);
-        const flr = Math.floor(yj);
-        plot_4_points(xi, flr, 1 - frc, p4_params);
-        plot_4_points(xi, flr + 1, frc, p4_params);
+        const yInteger = Math.floor(yj);
+        plot_4_points(x, yInteger, 1 - frc, p4_params);
+        plot_4_points(x, yInteger + 1, frc, p4_params);
     }
 
-    for (let yi = 0; yi <= ffd; yi++) {
-        const xj = Math.sqrt(rsq - (yi ** 2));
+    for (let y = 0; y <= fortyFiveDegrees; y++) {
+        const xj = Math.sqrt(radiusSquared - (y ** 2));
         const frc = fpart(xj);
-        const flr = Math.floor(xj);
-        plot_4_points(flr, yi, 1 - frc, p4_params);
-        plot_4_points(flr + 1, yi, frc, p4_params);
+        const xInteger = Math.floor(xj);
+        plot_4_points(xInteger, y, 1 - frc, p4_params);
+        plot_4_points(xInteger + 1, y, frc, p4_params);
     }
 
     //add the exact points for 0, 90, 180, 270 degrees (they're missing for some reason)
     for (let angle = 0; angle <= 360; angle += 90) {
-        const x = Math.round(r * Math.sin(Math.PI * 2 * angle / 360));
-        const y = Math.round(r * Math.cos(Math.PI * 2 * angle / 360));
+        const x = Math.round(radius * Math.sin(Math.PI * 2 * angle / 360));
+        const y = Math.round(radius * Math.cos(Math.PI * 2 * angle / 360));
         const pt = (y * result.width) + x + p4_params.center_pix;
         result.arr[pt] = high_opac;
     }
