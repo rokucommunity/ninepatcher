@@ -62,7 +62,7 @@ export class NinePatcher {
         canvas.setPixel(black, centerPoint, 0);
 
         //write a transparent pixel in the last spot to ensure our output file is the correct dimensions
-        canvas.setPixel(new Color(0x00000000), width, height);
+        canvas.setPixel(new Color(0x00000000), width + 1, height + 1);
 
         const outPath = path.resolve(this.outDir, config.outFile);
         // console.log(canvas.toString());

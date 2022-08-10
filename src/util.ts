@@ -44,22 +44,22 @@ export function drawCircle(canvas: Canvas, options: { radius: number; borderColo
         for (let x = 0; x < result.width; x++) {
             const opacity = result.arr[(y * result.width) + x];
             if (opacity) {
-                canvas.setPixel(options.borderColor.clone().setAlpha(opacity), x, y);
+                canvas.setPixel(options.borderColor.clone().setAlpha(opacity), x - 1, y - 1);
             }
         }
     }
 
     //fill the circle
-    for (let fillRadius = radius - 2; fillRadius >= 0; fillRadius--) {
+    for (let fillRadius = radius - 1; fillRadius >= 0; fillRadius--) {
         const points = getCircumference({
             strokeWidth: 1,
             radius: fillRadius,
             //draw these relative to the center of the outer circle
-            xOffset: radius + 1,
+            xOffset: radius,
             //draw these relative to the center of the outer circle
-            yOffset: radius + 1
+            yOffset: radius
         });
-        // canvas.setPixels(options.fillColor, ...points);
+        canvas.setPixels(options.fillColor, ...points);
     }
 }
 

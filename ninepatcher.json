@@ -4,8 +4,9 @@
         {
             "backgroundColor": "rgba(0, 0, 0, 0)",
             "borderColor": "#2D2F2F",
+            "borderRadius": 19,
+            "borderWidth": 4,
             "fillColor": "#2D2F2F",
-            "borderRadius": 19.5,
             "stretchWidth": 1,
             "outFile": "output.png"
         }
