@@ -56,6 +56,28 @@ describe('Color', () => {
         expectColor(0x01020300, [1, 2, 3, 0]);
     });
 
+    it('rounds color values to nearest integer', () => {
+        expect(new Color([1.2, 2.3, 3.5, 4.9])['value']).to.eql([1, 2, 4, 5]);
+    });
+
+    it('rounds incoming values to nearest integer', () => {
+        const color = new Color(0);
+        color.red = 1.2;
+        color.green = 2.3;
+        color.blue = 3.5;
+        color.alpha = 5;
+        expect(color.toRgbaArray()).to.eql([1, 2, 4, 5]);
+    });
+
+    it('rounds incoming `set` values to nearest integer', () => {
+        const color = new Color(0);
+        color.setRed(1.2);
+        color.setGreen(2.3);
+        color.setBlue(3.5);
+        color.setAlpha(5);
+        expect(color.toRgbaArray()).to.eql([1, 2, 4, 5]);
+    });
+
     describe('toInteger', () => {
         it('converts rgba to proper hex integer', () => {
             expect(new Color([1, 2, 3, 4]).toInteger()).to.eql(0x01020304);

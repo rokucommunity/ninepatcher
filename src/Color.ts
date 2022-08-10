@@ -153,7 +153,7 @@ function snap(value: number) {
     if (value > 255) {
         return 255;
     }
-    return value;
+    return Math.round(value);
 }
 
 function isColor(value: any): value is Color {
