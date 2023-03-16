@@ -2,7 +2,7 @@
 
 A tool to generate 9-patch images. This was created to support Roku development, but can be used for any 9-patch generation your project might need.
 
-[![build status](https://img.shields.io/github/workflow/status/rokucommunity/ninepatcher/build.svg?logo=github)](https://github.com/rokucommunity/ninepatcher/actions?query=workflow%3Abuild)
+[![build status](https://img.shields.io/github/actions/workflow/status/rokucommunity/ninepatcher/build.yml?branch=master)](https://github.com/rokucommunity/ninepatcher/actions?query=branch%3Amaster+workflow%3Abuild)
 [![Coverage Status](https://coveralls.io/repos/github/rokucommunity/ninepatcher/badge.svg?branch=master)](https://coveralls.io/github/rokucommunity/ninepatcher?branch=master)
 [![monthly downloads](https://img.shields.io/npm/dm/ninepatcher.svg?sanitize=true&logo=npm&logoColor=)](https://npmcharts.com/compare/ninepatcher?minimal=true)
 [![npm version](https://img.shields.io/npm/v/ninepatcher.svg?logo=npm)](https://www.npmjs.com/package/ninepatcher)
