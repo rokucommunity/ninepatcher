@@ -1,6 +1,5 @@
 import { Color } from './Color';
 import * as Jimp from 'jimp';
-import { colorAverage } from './util';
 
 export class Canvas {
     constructor(
