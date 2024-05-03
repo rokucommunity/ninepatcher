@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import type { ColorLike, RgbaArray } from './Color';
+import type { ColorLike } from './Color';
 import { Color } from './Color';
 
 describe('Color', () => {

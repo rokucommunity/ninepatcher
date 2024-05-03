@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { Canvas } from './Canvas';
 import { Color } from './Color';
 import { expectColor } from './Color.spec';
@@ -9,8 +8,6 @@ describe('Canvas', () => {
     const black = new Color(0x000000FF);
     const white = new Color(0xFFFFFFFF);
     const red = new Color(0xFF000000);
-    const blue = new Color(0x00FF00FF);
-    const green = new Color(0x0000FFFF);
 
     beforeEach(() => {
         canvas = new Canvas(new Color(0x00000000));
