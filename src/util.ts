@@ -39,28 +39,32 @@ export function drawCircle(canvas: Canvas, options: { radius: number; borderColo
     //     0.7
     // );
     // canvas.setPixels(options.borderColor.setAlpha(230), ...borderPoints);
-    const result = wuCircle(radius);
-    for (let y = 0; y < result.height; y++) {
-        for (let x = 0; x < result.width; x++) {
-            const opacity = result.arr[(y * result.width) + x];
-            if (opacity) {
-                canvas.setPixel(options.borderColor.clone().setAlpha(opacity), x - 1, y - 1);
+
+    for (let fillRadius = radius; fillRadius >= 0; fillRadius--) {
+        const offset = radius - fillRadius;
+        const result = wuCircle(fillRadius);
+        for (let y = 0; y < result.height; y++) {
+            for (let x = 0; x < result.width; x++) {
+                const opacity = result.arr[(y * result.width) + x];
+                if (opacity) {
+                    canvas.setPixel(options.borderColor.clone().setAlpha(opacity), x - 1 + offset, y - 1 + offset);
+                }
             }
         }
     }
 
     //fill the circle
-    for (let fillRadius = radius - 1; fillRadius >= 0; fillRadius--) {
-        const points = getCircumference({
-            strokeWidth: 1,
-            radius: fillRadius,
-            //draw these relative to the center of the outer circle
-            xOffset: radius,
-            //draw these relative to the center of the outer circle
-            yOffset: radius
-        });
-        canvas.setPixels(options.fillColor, ...points);
-    }
+    // for (let fillRadius = radius - 1; fillRadius >= 0; fillRadius--) {
+    //     const points = getCircumference({
+    //         strokeWidth: 1,
+    //         radius: fillRadius,
+    //         //draw these relative to the center of the outer circle
+    //         xOffset: radius,
+    //         //draw these relative to the center of the outer circle
+    //         yOffset: radius
+    //     });
+    //     canvas.setPixels(options.fillColor, ...points);
+    // }
 }
 
 export function getCircumference(options: { radius: number; strokeWidth: number; xOffset: number; yOffset: number }) {
