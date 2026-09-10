@@ -21,18 +21,6 @@
     "nine patch",
     "ninepatch"
   ],
-  "mocha": {
-    "spec": "src/**/*.spec.ts",
-    "require": [
-      "source-map-support/register",
-      "ts-node/register"
-    ],
-    "fullTrace": true,
-    "timeout": 987654321,
-    "watchExtensions": [
-      "ts"
-    ]
-  },
   "files": [
     "dist/**/!(*.spec.*)*",
     "bslib.brs",
